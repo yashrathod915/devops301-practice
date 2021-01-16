@@ -1,72 +1,33 @@
+node 
+{
 
-de {
+	// Get Artifactory server instance, defined in the Artifactory Plugin administration page.
+    	def server = Artifactory.server "01"
+    	def buildInfo = Artifactory.newBuildInfo() 
 
-// Get Artifactory server instance, defined in the Artifactory Plugin administration page.
+	// Project Dir
+    	def project_path = "Download"
 
-    def server = Artifactory.server "01"
+	stage('GitCheckOut') {
+		git branch: 'stage', credentialsId: '01', url: 'https://github.com/amitvashisttech/devops301-mindtree-09-Jan-2021.git'
+	}
 
-    def buildInfo = Artifactory.newBuildInfo() 
+	dir(project_path){
+		stage('Build Managment') {
+      			def downloadSpec = """{
+	 					"files": [
+								{
+								"pattern": "petclinic/*.war",
+								"target": "files/"
+        							}
+							]
+					}"""
+			server.download spec: downloadSpec
+ 		}
 
+      	 	stage('Deployment - Stage'){
+			 deploy adapters: [tomcat8(credentialsId: '01', path: '', url: 'http://knrga38148dns.eastus2.cloudapp.azure.com:8080/')], contextPath: 'PetclinicTomcat', onFailure: false, war: '01-Jenkins/petclinic-code/target/*.war'
 
-
-// Project Dir
-
-    def project_path = "Download"
-
-
-
-
-
-stage('GitCheckOut') {
-
-git branch: 'stage', credentialsId: '01', url: 'https://github.com/amitvashisttech/devops301-mindtree-09-Jan-2021.git'
-
-}
-
-
-
-
-
-
-
-dir(project_path){
-
-
-
-stage('Build Managment') {
-
-      def downloadSpec = """{
-
-	 "files": [
-
-	{
-
-	"pattern": "petclinic-war/*.war",
-
-	"target": "files/"
-
-        }
-
-	]
-
-	}"""
-
-	server.download spec: downloadSpec
-
- }
-
-
-
-stage('Deployment - Stage'){
-
- deploy adapters: [tomcat8(credentialsId: '02', path: '', url: 'http://172.31.0.201:8080/')], contextPath: 'petclinic', onFailure: false, war: 'files/petclinic.war'
-
-}
-
-
-
-}
-
-
-
+		}
+	}
 }
