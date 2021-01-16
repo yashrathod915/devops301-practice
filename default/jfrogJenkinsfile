@@ -1,128 +1,57 @@
-
-de {
-
-// Get Artifactory server instance, defined in the Artifactory Plugin administration page.
-
-    def server = Artifactory.server "01"
-
-    def buildInfo = Artifactory.newBuildInfo() 
-
-
-
-// Project Dir
-
-    def project_path = "01-Jenkins/petclinic-code"
-
-
-
-
-
-stage('GitCheckOut') {
-
-git branch: 'main', credentialsId: '01', url: 'https://github.com/amitvashisttech/devops301-mindtree-09-Jan-2021.git'
-
-}
-
-
-
-
-
-
-
-dir(project_path){
-
-
-
-stage('Maven Clean') {
-
-sh 'mvn clean'
-
-}
-
-
-
-stage('Maven Compile') {
-
-sh 'mvn compile'
-
-}
-
-
-
-stage('Maven test') {
-
-sh 'mvn test'
-
-}
-
-
-
-stage('Maven pkg') {
-
-sh 'mvn package'
-
-}
-
-
-
-stage('Build Managment') {
-
-      def uploadSpec = """{
-
-	 "files": [
-
-	{
-
-	"pattern": "**/*.war",
-
-	"target": "petclinic-war"
-
-        }
-
-	]
-
-	}"""
-
-	server.upload spec: uploadSpec
-
- }
-
-
-
-
-
-stage('Publish build info') {
-
-  server.publishBuildInfo buildInfo
-
-}
-
-
-
-stage('Archive Artifacts') {
-
-archive 'target/*.war'    
-
-}
-
-
-
-stage('Deployment - PreProd') {
-
-sh 'docker-compose up -d --build'
-
-}
-
-}
-
-
-
-stage('Deployment - Stage'){
-
- deploy adapters: [tomcat8(credentialsId: '02', path: '', url: 'http://172.31.0.201:8080/')], contextPath: 'petclinic', onFailure: false, war: '01-Jenkins/petclinic-code/target/petclinic.war'
-
-}
-
+node {
+	// Get Artifactory server instance, defined in the Artifactory Plugin administration page.
+    	def server = Artifactory.server "01"
+    	def buildInfo = Artifactory.newBuildInfo() 
+
+	// Project Dir
+    	def project_path = "01-Jenkins/petclinic-code"
+
+
+       stage('GitCheckOut') {
+   	     git branch: 'main', credentialsId: '01', url: 'https://github.com/amitvashisttech/devops301-mindtree-09-Jan-2021.git'
+    	}
+
+
+
+     dir(project_path)
+     {
+
+        stage('Maven Clean') {
+	        sh 'mvn clean'
+	    	}
+
+	    stage('Maven Compile') {
+        	sh 'mvn compile'
+    		}
+
+	    stage('Maven test') {
+        	sh 'mvn test'
+   		 }
+
+	   // stage('Sonar-Code-Analysis'){
+    //     	sh 'mvn sonar:sonar -Dsonar.host.url=http://knrga38148dns.eastus2.cloudapp.azure.com:8090/ -Dsonar.login=54c7ec2e4aa59b7765f8ef9a4a56a17782339186' 
+    // 		}
+    
+	    stage('Maven pkg') {
+        	sh 'mvn package'
+    		}
+
+	    stage('Build Managment')
+    		{
+         		def uploadSpec = """{
+	        	"files": [
+	         	   	{
+	             		"pattern": "**/*.war",
+	             		"target": "petclinic"
+                		}
+	            	]
+	       	 }"""
+	    	server.upload spec: uploadSpec
+    		}
+	}
+
+    stage('Tomcat Deployment'){
+         deploy adapters: [tomcat8(credentialsId: '01', path: '', url: 'http://knrga38148dns.eastus2.cloudapp.azure.com:8080/')], contextPath: 'PetclinicTomcat', onFailure: false, war: '01-Jenkins/petclinic-code/target/*.war'
+	}
  
-
 }
