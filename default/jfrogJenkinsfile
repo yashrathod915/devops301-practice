@@ -99,6 +99,14 @@ stage('Publish build info') {
 
 
 
+stage('Archive Artifacts') {
+
+archive 'target/*.war'    
+
+}
+
+
+
 stage('Deployment - PreProd') {
 
 sh 'docker-compose up -d --build'
