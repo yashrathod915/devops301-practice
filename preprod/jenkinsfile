@@ -9,7 +9,7 @@ node
 
 
 	stage('GitCheckOut') {
-		git branch: 'preprod', credentialsId: '01', url: 'https://github.com/amitvashisttech/devops301-mindtree-09-Jan-2021.git'
+		git branch: 'prepod', credentialsId: '01', url: 'https://github.com/yashrathod915/devops301-practice.git'
 	}
 
 
