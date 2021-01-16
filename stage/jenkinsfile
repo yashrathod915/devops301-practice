@@ -26,8 +26,5 @@ node
  		}
 
       	 	stage('Deployment - Stage'){
-			 deploy adapters: [tomcat8(credentialsId: '01', path: '', url: 'http://knrga38148dns.eastus2.cloudapp.azure.com:8080/')], contextPath: 'PetclinicTomcat', onFailure: false, war: '01-Jenkins/petclinic-code/target/*.war'
-
-		}
-	}
+			 deploy adapters: [tomcat8(credentialsId: '01', path: '', url: 'http://knrga38148dns.eastus2.cloudapp.azure.com:8080/')], contextPath: 'PetclinicTomcat', onFailure: false, war: 'files/*war'}
 }
