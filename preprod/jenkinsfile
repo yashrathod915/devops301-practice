@@ -1,112 +1,58 @@
+node 
+{
+	// Get Artifactory server instance, defined in the Artifactory Plugin administration page.
+    	def server = Artifactory.server "01"
+    	def buildInfo = Artifactory.newBuildInfo() 
 
-de {
-
-// Get Artifactory server instance, defined in the Artifactory Plugin administration page.
-
-    def server = Artifactory.server "01"
-
-    def buildInfo = Artifactory.newBuildInfo() 
+	// Project Dir
+    	def project_path = "petclinic-code"
 
 
-
-// Project Dir
-
-    def project_path = "petclinic-code"
-
+	stage('GitCheckOut') {
+		git branch: 'preprod', credentialsId: '01', url: 'https://github.com/amitvashisttech/devops301-mindtree-09-Jan-2021.git'
+	}
 
 
 
-
-stage('GitCheckOut') {
-
-git branch: 'preprod', credentialsId: '01', url: 'https://github.com/amitvashisttech/devops301-mindtree-09-Jan-2021.git'
-
-}
-
-
-
-
-
-
-
-dir(project_path){
-
-
-
-stage('Maven Clean') {
-
-sh 'mvn clean'
-
-}
-
-
-
-stage('Maven Compile') {
-
-sh 'mvn compile'
-
-}
-
-
-
-stage('Maven test') {
-
-sh 'mvn test'
-
-}
-
-
-
-stage('Maven pkg') {
-
-sh 'mvn package'
-
-}
-
-
-
-stage('Build Managment') {
-
-      def uploadSpec = """{
-
-	 "files": [
-
+	dir(project_path)
 	{
 
-	"pattern": "**/*.war",
+		stage('Maven Clean') {
+			sh 'mvn clean'
+		}
 
-	"target": "petclinic-war"
+		stage('Maven Compile') {
+			sh 'mvn compile'
+		}
 
-        }
+		stage('Maven test') {
+			sh 'mvn test'
+		}
 
-	]
+		stage('Maven pkg') {
+			sh 'mvn package'
+		}
 
-	}"""
-
-	server.upload spec: uploadSpec
-
- }
-
-
-
-
-
-stage('Publish build info') {
-
-  server.publishBuildInfo buildInfo
-
-}
-
-
-
-stage('Deployment - PreProd') {
-
-sh 'docker-compose up -d --build'
-
-}
-
-}
+		stage('Build Managment') {
+      			def uploadSpec = """{
+	 			"files": [
+						{
+							"pattern": "**/*.war",
+							"target": "petclinic-war"
+					        }
+					]
+			}"""
+			server.upload spec: uploadSpec
+ 		}
 
 
+		stage('Publish build info') {
+ 		 server.publishBuildInfo buildInfo
+		}
+
+		stage('Deployment - PreProd') {
+			sh 'docker-compose up -d --build'
+		}
+	}
 
 }
