@@ -1,0 +1,39 @@
+node
+{
+	try {
+
+		// Get Artifactory server instance, defined in the Artifactory Plugin administration page.
+		def server = Artifactory.server "01"
+    		def buildInfo = Artifactory.newBuildInfo() 
+
+
+		stage('GitCheckOut') {
+			git branch: 'terraform', credentialsId: '01', url: 'https://github.com/yashrathod915/devops301-practice.git'
+		}
+
+		stage('Build Managment') {
+      			def downloadSpec = """{
+	 			"files": [
+					{
+						"pattern": "petclinic-war/*.war",
+						"target": "ansible-code/roles/petclinic/files/"
+        				}
+				]
+				}"""
+			server.download spec: downloadSpec
+ 		}
+
+
+		stage('Getting Ready for Ansible Deploy'){
+   				sh "echo \'<h1> TASK BUILD ID: ${env.BUILD_DISPLAY_NAME}</h1>\'  > ansible-code/roles/petclinic/files/jenkins.html"
+  		}
+
+		stage('Deployment via terraform'){
+   			sh 'terraform init'
+   			sh 'terraform apply --auto-approve'
+  		}
+	} catch(err){
+  		currentBuild.result = 'FAILURE'
+ 	}	
+}
+
