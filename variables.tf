@@ -4,7 +4,7 @@ variable "key_name" {
 }
 
 variable "pvt_key" {
-  default = ""/home/devopslab/ubuntukey.pem"
+  default = "/home/devopslab/ubuntukey.pem"
 }
 
 variable "sg_id" {
