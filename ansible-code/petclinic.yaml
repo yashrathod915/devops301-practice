@@ -1,5 +1,5 @@
 ---
-- hosts: demo
+- hosts: all
   name: "Petclinic App Server Deployment"
   become: yes
   roles:
