@@ -4,7 +4,7 @@ variable "key_name" {
 }
 
 variable "pvt_key" {
-  default = "/root/.ssh/ubuntukey.pem"
+  default = "/home/ubuntukey.pem"
 }
 
 variable "sg_id" {
