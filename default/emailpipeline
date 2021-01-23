@@ -1,0 +1,43 @@
+node {
+    notify('Started')
+    stage('GitCheckOut') {
+        git branch: 'main', url: 'https://github.com/amitvashisttech/devops301-mindtree-09-Jan-2021.git'
+    }
+
+def project_path = "01-Jenkins/petclinic-code"
+dir(project_path){
+    stage('Maven Clean') {
+        sh 'mvn clean'
+    }
+
+    stage('Maven Compile') {
+        sh 'mvn compile'
+    }
+
+    stage('Maven test') {
+        sh 'mvn test'
+    }
+
+    stage('Maven pkg') {
+        sh 'mvn package'
+    }
+
+    stage('Archive Artifacts') {
+        archive 'target/*.war'    
+    }
+}
+
+ stage('Tomcat Deployment'){
+     deploy adapters: [tomcat8(credentialsId: '01', path: '', url: 'http://knrga38148dns.eastus2.cloudapp.azure.com:8080/')], contextPath: 'PetclinicTomcat', onFailure: false, war: '01-Jenkins/petclinic-code/target/*.war'
+
+ }
+ notify('Completed')
+}
+def notify(status){
+    emailext(
+    to: "yash.rathod@outlook.com",
+    subject: "${status} :JOB '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+    body:"""<p>${status}: :JOB '${env.JOB_NAME} [${env.BUILD_NUMBER}]':</p>
+            <p>Check Console output at <a href='${env.BUILD_URL}'>${env.JOB_NAME} [${env.BUILD_NUMBER}]</a></p>""",
+    )
+}
